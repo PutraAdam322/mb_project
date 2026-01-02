@@ -47,3 +47,7 @@ app.*.map.json
 .linux/
 .macos/
 .windows/
+
+/linux/
+/macos/
+/windows/
