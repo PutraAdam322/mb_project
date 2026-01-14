@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../data/databases/todo_database.dart';
 import 'presentation/pages/home_page.dart';
 
-void main() {
-  runApp(const ToDoApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await TodoDatabase.initialize();
+
+  runApp(ChangeNotifierProvider(
+      create: (context) => TodoDatabase(),
+      child: const ToDoApp(),
+    ));
 }
 
 class ToDoApp extends StatelessWidget {
