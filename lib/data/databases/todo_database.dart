@@ -18,20 +18,20 @@ class TodoDatabase extends ChangeNotifier {
     final List<Todo> currentTodos = [];
 
     Future<void> addTodo (String titleIp, String descIp, String priorityIp) async {
-      final newTodo = Todo(titleIp, descIp, priorityIp, false);
+      final newTodo = Todo(titleIp, descIp, priorityIp, false)..orderIndex = currentTodos.length;
       await isar.writeTxn(() => isar.todos.put(newTodo));
       await fetchTodos();
 
     }
 
     Future<void> fetchTodos()async{
-      List<Todo> fetchedTodos = await isar.todos.where().findAll();
+      List<Todo> fetchedTodos = await isar.todos.where().sortByOrderIndex().findAll();
       currentTodos.clear();
       currentTodos.addAll(fetchedTodos);
       notifyListeners();
     }
 
-    Future<void> updateTodos(int id, String newTitle, String newDesc, String newPriority) async {
+    Future<void> updateTodo(int id, String newTitle, String newDesc, String newPriority) async {
       final existingTodo = await isar.todos.get(id);
       if (existingTodo != null) {
         existingTodo.title = newTitle;
@@ -54,5 +54,21 @@ class TodoDatabase extends ChangeNotifier {
     Future<void> deleteNote(int id) async {
       await isar.writeTxn(() => isar.todos.delete(id));
       await fetchTodos();
+    }
+
+    Future<void> reorderTodos(int oldIndex, int newIndex) async {
+      if (newIndex > oldIndex) newIndex -= 1;
+
+      final todo = currentTodos.removeAt(oldIndex);
+      currentTodos.insert(newIndex, todo);
+
+      await isar.writeTxn(() async {
+        for (int i = 0; i < currentTodos.length; i++) {
+          currentTodos[i].orderIndex = i;
+          await isar.todos.put(currentTodos[i]);
+        }
+      });
+
+      notifyListeners();
     }
 }

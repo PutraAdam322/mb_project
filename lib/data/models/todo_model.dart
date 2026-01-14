@@ -11,4 +11,6 @@ class Todo {
   late String priority;
   late bool isFinished;
 
+  late int orderIndex;
+
 }
